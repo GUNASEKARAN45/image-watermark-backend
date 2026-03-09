@@ -25,7 +25,6 @@ const makeOverlay = (text, gravity, x, y) => ({
   angle: -35,
 });
 
-// POST /api/images/upload
 router.post('/upload', protect, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No image provided' });
@@ -73,7 +72,6 @@ router.post('/upload', protect, upload.single('image'), async (req, res) => {
   }
 });
 
-// GET /api/images/my — only current user's images
 router.get('/my', protect, async (req, res) => {
   try {
     const images = await Image.find({ uploadedBy: req.user._id }).sort({ createdAt: -1 });
@@ -83,7 +81,6 @@ router.get('/my', protect, async (req, res) => {
   }
 });
 
-// GET /api/images/share/:token — public, no auth
 router.get('/share/:token', async (req, res) => {
   try {
     const image = await Image.findOne({ shareToken: req.params.token });
@@ -94,21 +91,17 @@ router.get('/share/:token', async (req, res) => {
   }
 });
 
-// DELETE /api/images/:id — only owner can delete
 router.delete('/:id', protect, async (req, res) => {
   try {
     const image = await Image.findById(req.params.id);
     if (!image) return res.status(404).json({ message: 'Image not found' });
 
-    // Ensure only the owner can delete
     if (image.uploadedBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to delete this image' });
     }
 
-    // Delete from Cloudinary
     await cloudinary.uploader.destroy(image.cloudinaryId);
 
-    // Delete from DB
     await image.deleteOne();
 
     res.json({ message: 'Image deleted successfully' });
