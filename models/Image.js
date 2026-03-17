@@ -14,6 +14,12 @@ const imageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  originalUrl: {
+    type: String,
+  },
+  originalCloudinaryId: {
+    type: String,
+  },
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
